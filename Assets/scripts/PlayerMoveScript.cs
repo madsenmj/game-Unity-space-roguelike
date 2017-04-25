@@ -10,6 +10,8 @@ public class PlayerMoveScript : TurnTakerScript {
 	private GameObject crumbTrail;
 	public List <LatticeVector> visited;
 
+	public float HUDScale = 200f;
+
 	public override void Start(){
 		base.Start ();
 
@@ -105,23 +107,21 @@ public class PlayerMoveScript : TurnTakerScript {
 
 
 	void setupMoveGuide(){
-		float scale = master.gridSize;
+		
 		GameObject moveGuide = GameObject.FindGameObjectWithTag ("MoveGuide");
-		moveGuide.transform.localScale = new Vector3 (scale/2f, scale/2f, scale/2f);
+		moveGuide.transform.localScale = new Vector3 (HUDScale/2f, HUDScale/2f, HUDScale/2f);
 	
 	}
 
 	void setupPlayerBox (){
-		float scale = master.gridSize;
+		
 		GameObject rhomDoc = GameObject.FindGameObjectWithTag ("PlayerBox");
-		rhomDoc.transform.localScale = new Vector3 (scale, scale, scale);
+		rhomDoc.transform.localScale = new Vector3 (HUDScale, HUDScale, HUDScale);
 		LineRenderer[] lines = GetComponentsInChildren<LineRenderer> ();
 
 		foreach (LineRenderer line in lines) {
-			line.startColor = Color.white;
-			line.endColor = Color.white;
-			line.startWidth = scale * 0.02f;
-			line.endWidth = scale * 0.02f;
+			line.startWidth = HUDScale * 0.02f;
+			line.endWidth = HUDScale * 0.02f;
 		}
 	
 	}

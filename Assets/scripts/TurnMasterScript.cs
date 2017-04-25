@@ -19,6 +19,8 @@ public class TurnMasterScript : MonoBehaviour {
 	public bool turnLock = false;
 
 	private GameObject player;
+	private GameObject crumbtrail;
+	private GameObject HUD;
 
 	void Awake(){
 		// Reset Unit Vectors by gridSize
@@ -33,7 +35,8 @@ public class TurnMasterScript : MonoBehaviour {
 		StartCoroutine (TurnHandler());
 
 		player = GameObject.FindGameObjectWithTag ("Player");
-
+		crumbtrail = GameObject.Find ("CrumbTrail");
+		HUD = GameObject.Find ("HUD");
 	}
 	
 	// Update is called once per frame
@@ -48,10 +51,20 @@ public class TurnMasterScript : MonoBehaviour {
 			if (Input.anyKeyDown) {
 				if (Input.GetMouseButtonDown (0) || Input.GetMouseButtonDown (1) || Input.GetMouseButtonDown (2)) {
 
-				} else if (!Input.GetKey(KeyCode.Keypad5)){
+				} else if (Input.GetKeyDown (KeyCode.T)) {
+					
+					crumbtrail.SetActive(!crumbtrail.activeSelf);
+
+				} else if (Input.GetKeyDown (KeyCode.H)) {
+					
+
+					HUD.SetActive(!HUD.activeSelf);
+
+				}else if (!Input.GetKey (KeyCode.Keypad5)) {
 					
 					player.GetComponent<PlayerMoveScript> ().turnShip ();
-
+					
+				
 				} else {
 					foreach (TurnTakerScript objectToTakeTurn in objectsThatTakeTurns) {
 						while (turnLock) {
