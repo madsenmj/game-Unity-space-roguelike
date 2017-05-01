@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LatticeVector
+public class LatticeVector : IEqualityComparer<LatticeVector>
 {
 	public int a1, a2, a3;
 
@@ -23,7 +23,7 @@ public class LatticeVector
 
 
 	public static LatticeVector operator +(LatticeVector a, LatticeVector b) {
-		return new LatticeVector(a.a1 + b.a1, a.a2 + b.a2, a.a3 - b.a3);
+		return new LatticeVector(a.a1 + b.a1, a.a2 + b.a2, a.a3 + b.a3);
 	}
 
 	public static LatticeVector operator -(LatticeVector a, LatticeVector b) {
@@ -54,6 +54,7 @@ public class LatticeVector
 
 	public override bool Equals(System.Object obj)
 	{
+		//Debug.Log ("Equals 1 Checked");
 		// If parameter is null return false.
 		if (obj == null)
 		{
@@ -73,6 +74,7 @@ public class LatticeVector
 
 	public bool Equals(LatticeVector p)
 	{
+		//Debug.Log ("Equals 2 Checked");
 		// If parameter is null return false:
 		if ((object)p == null)
 		{
@@ -83,9 +85,21 @@ public class LatticeVector
 		return a1 == p.a1 && a2 == p.a2 && a3 == p.a3;
 	}
 
+	public bool Equals(LatticeVector a, LatticeVector b) {
+		//Debug.Log ("Equals 3 Checked");
+		return a.a1 == b.a1 && a.a2 == b.a2 && a.a3 == b.a3;
+	}
+
 	public override int GetHashCode()
 	{
-		return a1 ^ a2 ^ a3;
+		//Debug.Log ("Hash 1 Checked");
+		return string.Format ("{0}-{1}-{2}", a1, a2, a3).GetHashCode ();
+	}
+
+	public int GetHashCode(LatticeVector p)
+	{
+		//Debug.Log ("Hash 2 Checked");
+		return string.Format ("{0}-{1}-{2}", p.a1, p.a2, p.a3).GetHashCode ();
 	}
 
 }

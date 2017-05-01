@@ -15,28 +15,38 @@ public class TurnMasterScript : MonoBehaviour {
 		new Vector3 (0.288675f, 0.816497f, 0.5f)
 	};
 
-	public TurnTakerScript[] objectsThatTakeTurns;
+	public GameObject[] objectsThatTakeTurns;
 	public bool turnLock = false;
 
-	private GameObject player;
+	public GameObject player;
 	private GameObject crumbtrail;
 	private GameObject HUD;
+
+	public int mapLimit = 10;
+
+	public Dictionary<LatticeVector, string> playableGrid;
+	public Dictionary <string, KeyCode> moveKeyDict;
 
 	void Awake(){
 		// Reset Unit Vectors by gridSize
 		for(int i=0; i<3; i++){
 			bases [i] *= gridSize;
 		}
+		playableGrid = new Dictionary<LatticeVector, string>();
+		setMoveKeyBindings ();
+
 	}
 
 	// Use this for initialization
 	void Start () {
-		objectsThatTakeTurns = GetComponentsInChildren<TurnTakerScript> ();
-		StartCoroutine (TurnHandler());
-
+		objectsThatTakeTurns = GameObject.FindGameObjectsWithTag("NPC");
 		player = GameObject.FindGameObjectWithTag ("Player");
 		crumbtrail = GameObject.Find ("CrumbTrail");
 		HUD = GameObject.Find ("HUD");
+
+		StartCoroutine (TurnHandler());
+
+
 	}
 	
 	// Update is called once per frame
@@ -61,18 +71,35 @@ public class TurnMasterScript : MonoBehaviour {
 					HUD.SetActive(!HUD.activeSelf);
 
 				}else if (!Input.GetKey (KeyCode.Keypad5)) {
-					
-					player.GetComponent<PlayerMoveScript> ().turnShip ();
+					foreach (var moveKeyPress in moveKeyDict) {
+						if (Input.GetKeyDown (moveKeyPress.Value) && !Input.GetKey (KeyCode.Keypad5)) {
+							player.GetComponent<PlayerMoveScript> ().turnShip (moveKeyPress.Key);
+							break; // only one additional keypress allowed
+						}
+					}
+
 					
 				
 				} else {
-					foreach (TurnTakerScript objectToTakeTurn in objectsThatTakeTurns) {
-						while (turnLock) {
-							yield return null;
-						}
-						objectToTakeTurn.takeTurn ();
+					string direction = "Stay";
+					foreach (var moveKeyPress in moveKeyDict) {
+						if (Input.GetKey (KeyCode.Keypad5) && Input.GetKeyDown (moveKeyPress.Value)) {
+							direction = moveKeyPress.Key;
+							player.GetComponent<PlayerMoveScript> ().takeTurn (direction);
 
-					}			
+
+							foreach (GameObject objectToTakeTurn in objectsThatTakeTurns) {
+								while (turnLock) {
+									yield return null;
+								}
+								objectToTakeTurn.GetComponent<TurnTakerScript>().takeTurn ();
+							}		
+
+
+							break;
+
+						}
+					}
 
 				}
 
@@ -82,6 +109,25 @@ public class TurnMasterScript : MonoBehaviour {
 			yield return new WaitForFixedUpdate();
 		}
 
+	}
+
+	void setMoveKeyBindings (){
+
+		moveKeyDict = new Dictionary<string, KeyCode> ()
+		{
+			{"Forward", 		KeyCode.Keypad8},
+			{"Backward", 		KeyCode.Keypad2},
+			{"ForwardLeft", 	KeyCode.Keypad7},
+			{"ForwardRight",	KeyCode.Keypad9},
+			{"BackwardLeft", 	KeyCode.Keypad1},
+			{"BackwardRight", 	KeyCode.Keypad3},
+			{"UpLeft", 			KeyCode.Keypad4},
+			{"DownRight", 		KeyCode.Keypad6},
+			{"UpRightBackward", KeyCode.KeypadPlus},
+			{"UpRightForward", 	KeyCode.KeypadMinus},
+			{"DownLeftForward",	KeyCode.Keypad0},
+			{"DownLeftBackward",KeyCode.KeypadPeriod}
+		};
 	}
 
 }

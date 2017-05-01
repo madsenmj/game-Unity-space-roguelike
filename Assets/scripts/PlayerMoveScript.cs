@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMoveScript : TurnTakerScript {
 
-	public Dictionary <string, KeyCode> moveKeyDict;
+
 
 	public GameObject crumb;
 	private GameObject crumbTrail;
@@ -18,7 +18,7 @@ public class PlayerMoveScript : TurnTakerScript {
 		setupMoveGuide ();
 		setupPlayerBox ();
 
-		setMoveKeyBindings ();
+
 
 		crumbTrail = GameObject.Find ("CrumbTrail");
 
@@ -27,28 +27,48 @@ public class PlayerMoveScript : TurnTakerScript {
 		newCrumb.transform.SetParent(crumbTrail.transform);
 		visited.Add (latticePosition);
 
+		master.playableGrid [latticePosition] = "player";
+
 	}
 		
 
 
-	public override void takeTurn(){
+	public override void takeTurn(string direction){
 
-		Debug.Log ("Player Taking Turn!");
+		//Debug.Log ("Player Taking Turn!");
 
-		foreach (var moveKeyPress in moveKeyDict) {
-			if (Input.GetKeyDown (moveKeyPress.Value) && Input.GetKey (KeyCode.Keypad5)) {
-				//Debug.Log ("Test Moving " + moveKeyPress.Key);
-				latticePosition += moveLatticeDict[moveKeyPress.Key];
-				targetDir = moveLatticeDict [moveKeyPress.Key].getWorldVector (master.bases);
-				destination = destination + targetDir;
+		//Debug.Log ("Test Moving " + direction);
+		LatticeVector newPosition = latticePosition +  moveLatticeDict[direction];
 
-				master.turnLock = true;
-				objectTurnLock = true;
-				break; // only one keypress allowed
+		Debug.Log ("Player attempting to move to " + newPosition.ToString ());
+		string attemptStatus = checkSpace (newPosition);
+		if (attemptStatus == "open") {
 
-			}
-	
+			master.playableGrid [latticePosition] = "open";
+			master.playableGrid [newPosition] = "player";
+
+			latticePosition = newPosition;
+			targetDir = moveLatticeDict [direction].getWorldVector (master.bases);
+			destination = destination + targetDir;
+
+
+
+			master.turnLock = true;
+			objectTurnLock = true;
+				
+		} else if (attemptStatus == "NPC") {
+
+
+
+			Debug.Log ("Player attacks NPC.");
+			targetDir = moveLatticeDict [direction].getWorldVector (master.bases);
+
+
 		}
+				
+
+	
+
 
 		//Debug.Log ("Length " + visited.Count.ToString());
 
@@ -56,7 +76,7 @@ public class PlayerMoveScript : TurnTakerScript {
 
 	public override void Update(){
 		if (master.turnLock && objectTurnLock) {
-			if (Vector3.Distance (destination, transform.position) > moveStep*0.001f) {
+			if (Vector3.Distance (destination, transform.position) > moveStep*0.00001f) {
 
 				transform.position = Vector3.MoveTowards(transform.position, destination, moveStep);
 
@@ -93,16 +113,9 @@ public class PlayerMoveScript : TurnTakerScript {
 
 
 
-	public void turnShip(){
+	public void turnShip(string direction){
 		Debug.Log ("Rotating");
-		foreach (var moveKeyPress in moveKeyDict) {
-			if (Input.GetKeyDown (moveKeyPress.Value) && !Input.GetKey (KeyCode.Keypad5)) {
-				targetDir = moveLatticeDict [moveKeyPress.Key].getWorldVector (master.bases);
-				break; // only one additional keypress allowed
-			}
-
-		}
-
+		targetDir = moveLatticeDict [direction].getWorldVector (master.bases);
 	}
 
 
@@ -126,24 +139,7 @@ public class PlayerMoveScript : TurnTakerScript {
 	
 	}
 
-	void setMoveKeyBindings (){
 
-		moveKeyDict = new Dictionary<string, KeyCode> ()
-		{
-			{"Forward", 		KeyCode.Keypad8},
-			{"Backward", 		KeyCode.Keypad2},
-			{"ForwardLeft", 	KeyCode.Keypad7},
-			{"ForwardRight",	KeyCode.Keypad9},
-			{"BackwardLeft", 	KeyCode.Keypad1},
-			{"BackwardRight", 	KeyCode.Keypad3},
-			{"UpLeft", 			KeyCode.Keypad4},
-			{"DownRight", 		KeyCode.Keypad6},
-			{"UpRightBackward", KeyCode.KeypadPlus},
-			{"UpRightForward", 	KeyCode.KeypadMinus},
-			{"DownLeftForward",	KeyCode.Keypad0},
-			{"DownLeftBackward",KeyCode.KeypadPeriod}
-		};
-	}
 		
 
 }
